@@ -1,0 +1,12 @@
+# env
+.env
+.env.*
+*.env
+
+# google credentials
+google_creds/
+**/service_account.json
+
+# python
+__pycache__/
+*.pyc
