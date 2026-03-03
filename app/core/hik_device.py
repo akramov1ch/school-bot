@@ -30,11 +30,47 @@ class HikDeviceClient:
     This client is structured to be extended per your deployed model.
     """
 
-    def __init__(self, settings: Settings, device: HikDevice) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        device: HikDevice | str,
+        username: str | None = None,
+        password: str | None = None,
+        device_type: str = "universal",
+    ) -> None:
+        """Create a Hikvision client.
+
+        Backward-compatible constructor.
+
+        Preferred form:
+            HikDeviceClient(settings, HikDevice(...))
+
+        Legacy form (still seen in some call-sites):
+            HikDeviceClient(settings, ip, username, password[, device_type])
+
+        The error in your screenshot ("takes 3 positional arguments but 4 were given")
+        is what happens when the legacy form is used against the newer
+        2-argument signature.
+        """
+
         self.settings = settings
-        self.device = device
-        self.base_url = f"http://{device.ip_address}"
-        self._auth = httpx.DigestAuth(device.username, device.password)
+
+        if isinstance(device, HikDevice):
+            self.device = device
+        else:
+            if username is None or password is None:
+                raise TypeError(
+                    "HikDeviceClient(settings, ip, username, password[, device_type]) requires username and password"
+                )
+            self.device = HikDevice(
+                ip_address=device,
+                username=username,
+                password=password,
+                device_type=device_type,
+            )
+
+        self.base_url = f"http://{self.device.ip_address}"
+        self._auth = httpx.DigestAuth(self.device.username, self.device.password)
 
     async def _request(self, method: str, path: str, **kwargs):
         timeout = httpx.Timeout(self.settings.HIK_HTTP_TIMEOUT_SEC)
