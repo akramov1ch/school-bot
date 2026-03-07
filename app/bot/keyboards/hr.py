@@ -1,46 +1,24 @@
 from __future__ import annotations
 
-from aiogram.types import (
-    ReplyKeyboardMarkup,
-    KeyboardButton,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
-)
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from app.bot.keyboards.common import action_kb, tx
 
 
-def hr_menu_kb() -> ReplyKeyboardMarkup:
-    """
-    HR menyu (Reply keyboard).
-    Router'da: reply_markup=hr_menu_kb()
-    """
-    return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="👥 Xodimlar")],
-            [KeyboardButton(text="🔁 Holat o‘zgartirish")],
-            [KeyboardButton(text="🔐 Parol tiklash")],
-            [KeyboardButton(text="⬅️ Orqaga")],
-        ],
-        resize_keyboard=True,
-        is_persistent=True,
-    )
+def hr_menu_kb(lang: str = "uz"):
+    return action_kb([
+        [tx("menu.hr.employees", lang), tx("menu.hr.status", lang)],
+        [tx("menu.hr.reset", lang), tx("menu.hr.faceid", lang)],
+        ["🌐 Til / Язык"],
+    ], lang=lang, with_cancel=False, with_home=True)
 
 
-def hr_status_inline_kb(prefix: str = "hr_status") -> InlineKeyboardMarkup:
-    """
-    Active/Inactive tanlash uchun inline keyboard.
-    Router'da:
-      reply_markup=hr_status_inline_kb()
-    Callback data:
-      hr_status:active | hr_status:inactive | hr_status:cancel
-    """
+def hr_status_inline_kb(prefix: str = "hr_status", *, lang: str = "uz") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="✅ Active", callback_data=f"{prefix}:active"),
-                InlineKeyboardButton(text="⛔ Inactive", callback_data=f"{prefix}:inactive"),
+                InlineKeyboardButton(text="✅ Faol", callback_data=f"{prefix}:active"),
+                InlineKeyboardButton(text="⛔ Nofaol", callback_data=f"{prefix}:inactive"),
             ],
-            [
-                InlineKeyboardButton(text="❌ Bekor qilish", callback_data=f"{prefix}:cancel"),
-            ],
+            [InlineKeyboardButton(text=tx("common.cancel", lang), callback_data=f"{prefix}:cancel")],
         ]
     )

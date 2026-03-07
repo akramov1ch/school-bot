@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.school import Employee
@@ -24,7 +24,17 @@ class EmployeeRepository(BaseRepository):
         return res.scalar_one_or_none()
 
     async def list(self, limit: int = 50) -> list[Employee]:
-        q = select(Employee).order_by(Employee.id.desc()).limit(limit)
+        q = select(Employee).order_by(Employee.full_name.asc()).limit(limit)
+        res = await self.session.execute(q)
+        return list(res.scalars().all())
+
+    async def search(self, query: str, limit: int = 20) -> list[Employee]:
+        q = (
+            select(Employee)
+            .where(or_(Employee.full_name.ilike(f"%{query}%"), Employee.employee_uid.ilike(f"%{query}%")))
+            .order_by(Employee.full_name.asc())
+            .limit(limit)
+        )
         res = await self.session.execute(q)
         return list(res.scalars().all())
 

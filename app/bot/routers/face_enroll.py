@@ -9,18 +9,19 @@ from aiogram.fsm.context import FSMContext
 from app.bot.states.face import FaceEnrollFlow
 from app.core.logging import get_logger
 from app.models.enums import UserRole
+from app.bot.keyboards.common import action_kb, tx
 
 router = Router()
 logger = get_logger(__name__)
 
 
-@router.message(F.text == "📷 Selfie (FaceID)")
+@router.message(F.text.in_({"📷 Selfie FaceID", tx("menu.teacher.faceid"), tx("menu.hr.faceid"), tx("menu.cashier.faceid"), tx("menu.admin.faceid_selfie")}))
 async def face_start(message: Message, state: FSMContext, actor_role: UserRole, **_):
     if actor_role not in (UserRole.TEACHER, UserRole.CASHIER, UserRole.HR, UserRole.ADMIN):
         await message.answer("❌ Bu bo‘lim faqat xodimlar uchun.")
         return
     await state.set_state(FaceEnrollFlow.waiting_selfie)
-    await message.answer("📷 Selfie rasm yuboring (photo).")
+    await message.answer("📷 Selfie rasmini yuboring.", reply_markup=action_kb([], lang="uz", with_cancel=True, with_home=True))
 
 
 @router.message(FaceEnrollFlow.waiting_selfie, F.photo)
@@ -57,4 +58,4 @@ async def face_receive(message: Message, state: FSMContext, actor_role: UserRole
 
 @router.message(FaceEnrollFlow.waiting_selfie)
 async def face_need_photo(message: Message, **_):
-    await message.answer("Iltimos, rasm (photo) yuboring.")
+    await message.answer("Iltimos, rasm yuboring.", reply_markup=action_kb([], lang="uz", with_cancel=True, with_home=True))

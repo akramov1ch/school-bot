@@ -40,3 +40,26 @@ class UserRepository(BaseRepository):
         self.session.add(u)
         await self.session.flush()
         return u
+
+    async def get_or_create_guest(self, telegram_id: int, full_name: str = "") -> User:
+        u = await self.get_by_telegram_id(telegram_id)
+        if u:
+            if full_name and not u.full_name:
+                u.full_name = full_name
+                self.session.add(u)
+            return u
+        u = User(telegram_id=telegram_id, full_name=full_name, role=UserRole.GUEST.value)
+        self.session.add(u)
+        await self.session.flush()
+        return u
+
+    async def set_lang(self, telegram_id: int, lang: str) -> User:
+        u = await self.get_by_telegram_id(telegram_id)
+        if not u:
+            u = User(telegram_id=telegram_id, full_name='', role=UserRole.GUEST.value, lang=lang)
+            self.session.add(u)
+            await self.session.flush()
+            return u
+        u.lang = lang
+        self.session.add(u)
+        return u

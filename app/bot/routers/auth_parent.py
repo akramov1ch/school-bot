@@ -7,6 +7,7 @@ from aiogram.fsm.context import FSMContext
 from app.bot.states.auth import ParentLogin
 from app.bot.keyboards.start import start_kb
 from app.bot.keyboards.parent import parent_menu_kb
+from app.bot.keyboards.common import action_kb, tx
 from app.core.logging import get_logger
 from app.core.utils import is_student_uid, normalize_uid
 from app.models.enums import UserRole
@@ -15,13 +16,13 @@ router = Router()
 logger = get_logger(__name__)
 
 
-@router.message(F.text == "👨‍👩‍👧 Ota-ona sifatida kirish")
+@router.message(F.text.in_({"👨‍👩‍👧 Ota-ona sifatida kirish", tx("start.parent_login")}))
 async def parent_entry(message: Message, state: FSMContext, actor_role: UserRole, **_):
     if actor_role != UserRole.GUEST:
         await message.answer("Siz allaqachon tizimdasiz. /start bosing.")
         return
     await state.set_state(ParentLogin.waiting_fm)
-    await message.answer("FM ID ni kiriting (misol: FM12345):", reply_markup=None)
+    await message.answer("FM ID ni kiriting (misol: FM12345):", reply_markup=action_kb([], lang="uz", with_cancel=True, with_home=True))
 
 
 @router.message(ParentLogin.waiting_fm)
@@ -32,7 +33,7 @@ async def parent_wait_fm(message: Message, state: FSMContext, **_):
         return
     await state.update_data(fm=fm)
     await state.set_state(ParentLogin.waiting_password)
-    await message.answer("Parolni kiriting:")
+    await message.answer("Parolni kiriting:", reply_markup=action_kb([], lang="uz", with_cancel=True, with_home=True))
 
 
 @router.message(ParentLogin.waiting_password)
@@ -43,7 +44,7 @@ async def parent_wait_password(message: Message, state: FSMContext, **_):
     if not fm or not password:
         await message.answer("Xatolik. Qaytadan /start bosing.")
         await state.clear()
-        await message.answer("Kirish turini tanlang:", reply_markup=start_kb())
+        await message.answer("Kirish turini tanlang:", reply_markup=start_kb("uz"))
         return
 
     # Bind flow: creates/gets parent user + links to student (FM+password)
@@ -91,7 +92,7 @@ async def parent_wait_password(message: Message, state: FSMContext, **_):
             await ps_repo.bind(parent_user_id=parent_user.id, student_id=student.id)
             await session.commit()
 
-        await message.answer("✅ O‘quvchi muvaffaqiyatli qo‘shildi.", reply_markup=parent_menu_kb())
+        await message.answer("✅ O‘quvchi muvaffaqiyatli qo‘shildi.", reply_markup=parent_menu_kb("uz"))
         await state.clear()
     finally:
         await redis.close()

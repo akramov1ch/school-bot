@@ -1,17 +1,12 @@
 from __future__ import annotations
 
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from app.bot.keyboards.common import action_kb, tx
 
 
-def parent_menu_kb() -> ReplyKeyboardMarkup:
-    kb = ReplyKeyboardBuilder()
-    kb.add(KeyboardButton(text="➕ O‘quvchi qo‘shish"))
-    kb.add(KeyboardButton(text="👶 Farzandlarim"))
-    kb.add(KeyboardButton(text="📊 Natijalar"))
-    kb.add(KeyboardButton(text="✍️ Uyga vazifalar"))
-    kb.add(KeyboardButton(text="💳 To‘lovlar tarixi"))
-    kb.add(KeyboardButton(text="📝 Taklif/Shikoyat"))
-    kb.add(KeyboardButton(text="🏠 Bosh меню"))
-    kb.adjust(2)
-    return kb.as_markup(resize_keyboard=True)
+def parent_menu_kb(lang: str = "uz"):
+    return action_kb([
+        [tx("menu.parent.children", lang), tx("menu.parent.add_child", lang)],
+        [tx("menu.parent.grades", lang), tx("menu.parent.homeworks", lang)],
+        [tx("menu.parent.payments", lang), tx("menu.parent.feedback", lang)],
+        ["🌐 Til / Язык"],
+    ], lang=lang, with_cancel=False, with_home=True)

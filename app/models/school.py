@@ -30,6 +30,7 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     role: Mapped[UserRole] = mapped_column(String(32), nullable=False, default=UserRole.GUEST.value)
     employee_id: Mapped[Optional[int]] = mapped_column(ForeignKey("employees.id", ondelete="SET NULL"), nullable=True)
+    lang: Mapped[str] = mapped_column(String(2), nullable=False, default='uz', server_default='uz')
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

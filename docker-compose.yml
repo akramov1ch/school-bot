@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-school}
       TZ: Asia/Tashkent
     ports:
-      - "5432:5432"
+      - "5469:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
